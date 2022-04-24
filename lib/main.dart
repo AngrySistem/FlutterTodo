@@ -5,6 +5,8 @@ import 'package:two/db/db_provider.dart';
 import 'package:two/screens/add_note.dart';
 import 'package:two/screens/show_note.dart';
 
+import 'package:intl/intl.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -39,6 +41,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return notes;
   }
 
+  final DateFormat formatter1 = DateFormat('yyyy-MM-dd');
+  final DateFormat formatter2 = DateFormat('Hms');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             onTap: () {
                               Navigator.pushNamed(context, "/ShowNote", arguments: Note(id: id, title: title, body: body, creation_date: DateTime.parse(creation_date),isDone: isDone));
                             },
-                            leading: const Icon(Icons.comment),
+                            leading: DateTime.parse(creation_date).isAfter(DateTime.now().toLocal()) ? Text(formatter1.format(DateTime.parse(creation_date)) + '\n' + formatter2.format(DateTime.parse(creation_date))) : Icon(Icons.comment),
                             title: Text(title, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500,)),
                             subtitle: Text(body),
                             trailing: isDone == 1 ? Icon(Icons.check_circle_outline, color: Colors.green,) : null,
@@ -109,7 +114,7 @@ Widget CustomNotesBar() {
                 fontSize: 28,
                 fontWeight: FontWeight.w900,
               )
-          ),
+          ), // ElevatedButton(onPressed: () {DbProvider.db.del();}, child: Text('del'))
         ],
       )
   );

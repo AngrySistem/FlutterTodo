@@ -67,4 +67,10 @@ class DbProvider {
         [note.title, note.body, note.creation_date.toString(), note.isDone, note.id]);
     return count;
   }
+
+  // Future<int> del() async {
+  //   final db = await database;
+  //   int count = await(db.rawDelete('DELETE FROM note'));
+  //   return count;
+  // }
 }

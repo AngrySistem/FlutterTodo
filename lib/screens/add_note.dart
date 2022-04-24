@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:two/model/note.dart';
 import 'package:two/db/db_provider.dart';
 
+import 'package:two/model/notifications.dart';
+import 'dart:math';
+
 class AddNote extends StatefulWidget {
   AddNote({Key? key}) : super(key: key);
 
@@ -15,6 +18,13 @@ class _AddNoteState extends State<AddNote> {
   String title = '';
   String body = '';
   DateTime? date;
+
+  DateTime? newDate;
+
+  int finalNotify = 0;
+  TextEditingController notifyControllerH = TextEditingController();
+  TextEditingController notifyControllerM = TextEditingController();
+  TextEditingController notifyControllerS = TextEditingController();
 
   TextEditingController titleController = TextEditingController();
   TextEditingController bodyController = TextEditingController();
@@ -43,6 +53,15 @@ class _AddNoteState extends State<AddNote> {
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               onChanged: (text) {setState(() {if(titleController.text.isNotEmpty) {_title_hint='Heading...';}});},
             ),
+            Row(children: [
+              Text('Timer:   ', style: TextStyle(fontSize: 16.7, color: Colors.black54),),
+              CustomField(notifyControllerH, 'h'),
+              SizedBox(width: 10),
+              CustomField(notifyControllerM, 'm'),
+              SizedBox(width: 10),
+              CustomField(notifyControllerS, 's'),
+            ],
+            ),
             Expanded(
               child: TextField(
                 controller: bodyController,
@@ -65,10 +84,29 @@ class _AddNoteState extends State<AddNote> {
           setState(() {
             title = titleController.text;
             body = bodyController.text;
-            date = DateTime.now();
+            date = DateTime.now().toLocal();
+
+            if(notifyControllerH.text.isNotEmpty) {
+              finalNotify += int.parse(notifyControllerH.text) * 3600;
+            }
+            if(notifyControllerM.text.isNotEmpty) {
+              finalNotify += int.parse(notifyControllerM.text) * 60;
+            }
+            if(notifyControllerS.text.isNotEmpty) {
+              finalNotify += int.parse(notifyControllerS.text);
+            }
+
+            if (notifyControllerH.text.isNotEmpty || notifyControllerM.text.isNotEmpty || notifyControllerS.text.isNotEmpty) {
+              newDate = date!.add(Duration(hours: notifyControllerH.text.isNotEmpty ? int.parse(notifyControllerH.text) : 0, minutes: notifyControllerM.text.isNotEmpty ? int.parse(notifyControllerM.text) : 0, seconds: notifyControllerS.text.isNotEmpty ? int.parse(notifyControllerS.text) : 0,));
+            }
           });
-          Note note = Note(title: title, body: body, creation_date: date);
+          Note note = Note(title: title, body: body, creation_date: newDate == null ? date : newDate);
           addNote(note);
+
+          Random random = new Random();
+          int randomNumber = random.nextInt(10000);
+          
+          finalNotify == 0 ? null : showNotification(randomNumber, finalNotify, title);
           Navigator.pushNamedAndRemoveUntil(context, "/", (route) => false);
         },
         label: Text("Save"),
@@ -90,4 +128,29 @@ class _AddNoteState extends State<AddNote> {
         label: Text("Save"),),
     );
   }
+}
+
+Widget CustomField(notifyController, textHint) {
+  return Container(
+    width: 50,
+    height: 32,
+    child: TextField(
+      controller: notifyController,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.amberAccent.withOpacity(0.2)),
+          borderRadius: const BorderRadius.all(Radius.circular(20)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.amberAccent),
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+            horizontal: 10
+        ),
+        hintText: textHint,
+      ),
+    ),
+  );
 }

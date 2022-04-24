@@ -70,7 +70,6 @@ class _ShowNoteState extends State<ShowNote> {
               setState(() {
                 note.title = titleController.text;
                 note.body = bodyController.text;
-                note.creation_date = DateTime.now();
               });
               Note editedNote = Note(id: note.id, title: note.title, body: note.body, creation_date: note.creation_date, isDone: note.isDone);
               editNote(editedNote);
