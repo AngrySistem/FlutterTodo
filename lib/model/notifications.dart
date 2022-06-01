@@ -26,3 +26,7 @@ void showNotification(id, time, titler) async {
       androidAllowWhileIdle: true
   );
 }
+
+void cancelNotification(id) async {
+  await localNotificationsPlugin.cancel(id);
+}

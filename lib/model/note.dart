@@ -4,8 +4,9 @@ class Note {
   String body;
   DateTime? creation_date;
   int isDone;
+  int? notifyId;
 
-  Note({this.id, required this.title, required this.body, this.creation_date, this.isDone = 0});
+  Note({this.id, required this.title, required this.body, this.creation_date, this.isDone = 0, this.notifyId});
 
   Map<String, dynamic> toMap() {
     return ({
@@ -14,6 +15,7 @@ class Note {
       "body": body,
       "creation_date": creation_date.toString(),
       "isDone": isDone,
+      "notifyId": notifyId
     });
   }
 }

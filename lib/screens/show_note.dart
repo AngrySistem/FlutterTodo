@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:two/model/notifications.dart';
+
 import 'package:two/db/db_provider.dart';
 import 'package:two/model/note.dart';
 
@@ -71,7 +73,8 @@ class _ShowNoteState extends State<ShowNote> {
                 note.title = titleController.text;
                 note.body = bodyController.text;
               });
-              Note editedNote = Note(id: note.id, title: note.title, body: note.body, creation_date: note.creation_date, isDone: note.isDone);
+              print(note.notifyId);
+              Note editedNote = Note(id: note.id, title: note.title, body: note.body, creation_date: note.creation_date, isDone: note.isDone, notifyId: note.notifyId);
               editNote(editedNote);
               Navigator.pushNamedAndRemoveUntil(context, "/", (route) => false);
               }
@@ -80,6 +83,9 @@ class _ShowNoteState extends State<ShowNote> {
           ),
           IconButton(
               onPressed: () {
+                if (note.notifyId! < 31000) {
+                  cancelNotification(note.notifyId);
+                }
                 DbProvider.db.deleteNote(note.id!);
                 Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
               },
@@ -115,3 +121,4 @@ class _ShowNoteState extends State<ShowNote> {
     );
   }
 }
+

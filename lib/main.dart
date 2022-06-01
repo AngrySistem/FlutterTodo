@@ -5,6 +5,7 @@ import 'package:two/db/db_provider.dart';
 import 'package:two/screens/add_note.dart';
 import 'package:two/screens/show_note.dart';
 
+import 'package:two/model/notifications.dart';
 import 'package:intl/intl.dart';
 
 void main() {
@@ -71,12 +72,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       String body = noteData.data[index]['body'];
                       String creation_date = noteData.data[index]['creation_date'];
                       int isDone = noteData.data[index]['isDone'];
+                      int notifyId = noteData.data[index]['notifyId'];
+
+                      if (notifyId < 31000) {
+                        if (DateTime.parse(creation_date).isAfter(DateTime.now())) {
+                          cancelNotification(notifyId);
+                          var diff = DateTime.parse(creation_date).difference(DateTime.now()).inSeconds;
+                          showNotification(notifyId, diff, title);
+                        }
+                      }
                       return Card(
                           child: ListTile(
                             onTap: () {
-                              Navigator.pushNamed(context, "/ShowNote", arguments: Note(id: id, title: title, body: body, creation_date: DateTime.parse(creation_date),isDone: isDone));
+                              Navigator.pushNamed(context, "/ShowNote", arguments: Note(id: id, title: title, body: body, creation_date: DateTime.parse(creation_date), isDone: isDone, notifyId: notifyId));
                             },
-                            leading: DateTime.parse(creation_date).isAfter(DateTime.now().toLocal()) ? Text(formatter1.format(DateTime.parse(creation_date)) + '\n' + formatter2.format(DateTime.parse(creation_date))) : Icon(Icons.comment),
+                            leading: DateTime.parse(creation_date).isAfter(DateTime.now()) ? Text(formatter1.format(DateTime.parse(creation_date)) + '\n' + formatter2.format(DateTime.parse(creation_date))) : Icon(Icons.comment),
                             title: Text(title, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500,)),
                             subtitle: Text(body),
                             trailing: isDone == 1 ? Icon(Icons.check_circle_outline, color: Colors.green,) : null,

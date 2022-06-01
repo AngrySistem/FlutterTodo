@@ -5,6 +5,9 @@ import 'package:two/db/db_provider.dart';
 
 import 'package:two/model/notifications.dart';
 import 'dart:math';
+import 'package:intl/intl.dart';
+
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
 class AddNote extends StatefulWidget {
   AddNote({Key? key}) : super(key: key);
@@ -21,11 +24,6 @@ class _AddNoteState extends State<AddNote> {
 
   DateTime? newDate;
 
-  int finalNotify = 0;
-  TextEditingController notifyControllerH = TextEditingController();
-  TextEditingController notifyControllerM = TextEditingController();
-  TextEditingController notifyControllerS = TextEditingController();
-
   TextEditingController titleController = TextEditingController();
   TextEditingController bodyController = TextEditingController();
 
@@ -36,6 +34,8 @@ class _AddNoteState extends State<AddNote> {
   String _title_hint = "Heading...";
   String _body_hint = "your note...";
 
+  var newFormat = DateFormat("yyyy-MM-dd  H:m");
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,6 +43,7 @@ class _AddNoteState extends State<AddNote> {
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
               controller: titleController,
@@ -53,14 +54,28 @@ class _AddNoteState extends State<AddNote> {
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               onChanged: (text) {setState(() {if(titleController.text.isNotEmpty) {_title_hint='Heading...';}});},
             ),
-            Row(children: [
-              Text('Timer:   ', style: TextStyle(fontSize: 16.7, color: Colors.black54),),
-              CustomField(notifyControllerH, 'h'),
-              SizedBox(width: 10),
-              CustomField(notifyControllerM, 'm'),
-              SizedBox(width: 10),
-              CustomField(notifyControllerS, 's'),
-            ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    DatePicker.showDateTimePicker(context,
+                      showTitleActions: true,
+                      minTime: DateTime.now(),
+                      maxTime: DateTime.now().add(Duration(days: 365)),
+                      onConfirm: (date) {
+                        setState(() {
+                          newDate = date;
+                        });
+                      },
+                      currentTime: DateTime.now(), locale: LocaleType.ru);
+                    },
+                  child: Text(
+                    'Reminder time...',
+                    style: TextStyle(color: Colors.amber, fontSize: 17),
+                  )),
+                newDate != null ? Text(newFormat.format(newDate!), style: TextStyle(fontSize: 15),) : Text(' '),
+              ],
             ),
             Expanded(
               child: TextField(
@@ -84,29 +99,21 @@ class _AddNoteState extends State<AddNote> {
           setState(() {
             title = titleController.text;
             body = bodyController.text;
-            date = DateTime.now().toLocal();
-
-            if(notifyControllerH.text.isNotEmpty) {
-              finalNotify += int.parse(notifyControllerH.text) * 3600;
-            }
-            if(notifyControllerM.text.isNotEmpty) {
-              finalNotify += int.parse(notifyControllerM.text) * 60;
-            }
-            if(notifyControllerS.text.isNotEmpty) {
-              finalNotify += int.parse(notifyControllerS.text);
-            }
-
-            if (notifyControllerH.text.isNotEmpty || notifyControllerM.text.isNotEmpty || notifyControllerS.text.isNotEmpty) {
-              newDate = date!.add(Duration(hours: notifyControllerH.text.isNotEmpty ? int.parse(notifyControllerH.text) : 0, minutes: notifyControllerM.text.isNotEmpty ? int.parse(notifyControllerM.text) : 0, seconds: notifyControllerS.text.isNotEmpty ? int.parse(notifyControllerS.text) : 0,));
-            }
+            date = DateTime.now();
           });
-          Note note = Note(title: title, body: body, creation_date: newDate == null ? date : newDate);
-          addNote(note);
 
           Random random = new Random();
-          int randomNumber = random.nextInt(10000);
-          
-          finalNotify == 0 ? null : showNotification(randomNumber, finalNotify, title);
+          int randomNumber = 31000;
+
+          if (newDate != null) {
+            var diff = newDate!.difference(date!).inSeconds;
+            randomNumber = random.nextInt(30000);
+            showNotification(randomNumber, diff, title);
+          }
+
+          Note note = Note(title: title, body: body, creation_date: newDate == null ? date : newDate, notifyId: randomNumber);
+          addNote(note);
+
           Navigator.pushNamedAndRemoveUntil(context, "/", (route) => false);
         },
         label: Text("Save"),
@@ -128,29 +135,4 @@ class _AddNoteState extends State<AddNote> {
         label: Text("Save"),),
     );
   }
-}
-
-Widget CustomField(notifyController, textHint) {
-  return Container(
-    width: 50,
-    height: 32,
-    child: TextField(
-      controller: notifyController,
-      keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.amberAccent.withOpacity(0.2)),
-          borderRadius: const BorderRadius.all(Radius.circular(20)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.amberAccent),
-          borderRadius: BorderRadius.all(Radius.circular(20)),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-            horizontal: 10
-        ),
-        hintText: textHint,
-      ),
-    ),
-  );
 }
