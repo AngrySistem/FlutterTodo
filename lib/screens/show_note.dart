@@ -56,6 +56,8 @@ class _ShowNoteState extends State<ShowNote> {
                   onChanged: (value) {
                     setState(() {
                       note.isDone = value! == false ? 0 : 1;
+                      note.title = titleController.text;
+                      note.body = bodyController.text;
                     });
                   },
                 ),
@@ -73,7 +75,6 @@ class _ShowNoteState extends State<ShowNote> {
                 note.title = titleController.text;
                 note.body = bodyController.text;
               });
-              print(note.notifyId);
               Note editedNote = Note(id: note.id, title: note.title, body: note.body, creation_date: note.creation_date, isDone: note.isDone, notifyId: note.notifyId);
               editNote(editedNote);
               Navigator.pushNamedAndRemoveUntil(context, "/", (route) => false);
